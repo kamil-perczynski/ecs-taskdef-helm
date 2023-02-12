@@ -1,0 +1,8 @@
+name: Render ECS task definition
+on: workflow_dispatch
+
+jobs:
+  generateECSTaskDef:
+    runs-on: ubuntu-latest
+    steps:
+      - run: helm template . | tail -n +3
