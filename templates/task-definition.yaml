@@ -1,0 +1,32 @@
+{{- define "ecs-definition" -}}
+networkMode: {{ .Values.networkMode | default "awsvpc" }}
+family: {{ .Values.containerName }}
+placementConstraints: []
+cpu: {{ toYaml .Values.limits.task.cpu }}
+executionRoleArn: {{ toYaml .Values.executionRoleArn }}
+volumes: []
+memory: {{ toYaml .Values.limits.task.memory }}
+requiresCompatibilities: {{ toYaml .Values.requiresCompatibilities | nindent 2 }}
+containerDefinitions:
+  - environment: []
+    name: {{ .Values.containerName }}
+    mountPoints: []
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    cpu: {{ toYaml .Values.limits.container.cpu }}
+    portMappings: {{ toYaml .Values.portMappings | nindent 4 }}
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-create-group: "true"
+        awslogs-region: {{ .Values.aws.region }}
+        awslogs-stream-prefix: ecs
+        {{- toYaml .Values.logConfiguration.options | nindent 8 }}
+    ulimits:
+      - softLimit: {{ toYaml .Values.limits.container.ulimit }}
+        name: nofile
+        hardLimit: {{ toYaml .Values.limits.container.ulimit }}
+    memory: {{ toYaml .Values.limits.container.memory }}
+    essential: true
+    volumesFrom: []
+{{- end }}
+{{ include "ecs-definition" . | fromYaml | toPrettyJson }}
